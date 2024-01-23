@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Library</title>
+</head>
+<body>
+    <h1>Library</h1>
+
+    <h2>Books</h2>
+    <ul>
+        {% for book in books %}
+            <li>{{ book.title }} by {{ book.author }} (ISBN: {{ book.isbn }}) {% if book.checked_out %}(Checked Out){% endif %}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Patrons</h2>
+    <ul>
+        {% for patron in patrons %}
+            <li>{{ patron.name }} (ID: {{ patron.id }})</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Add Book</h2>
+    <form method="POST" action="{{ url_for('add_book') }}">
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="title" required>
+        <label for="author">Author:</label>
+        <input type="text" id="author" name="author" required>
+        <label for="isbn">ISBN:</label>
+        <input type="text" id="isbn" name="isbn" required>
+        <button type="submit">Add Book</button>
+    </form>
+
+    <h2>Add Patron</h2>
+    <form method="POST" action="{{ url_for('add_patron') }}">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+        <button type="submit">Add Patron</button>
+    </form>
+
+    <h2>Check Out Book</h2>
+    <form method="POST" action="{{ url_for('check_out') }}">
+        <label for="patron_id">Patron ID:</label>
+        <input type="text" id="patron_id" name="patron_id" required>
+        <label for="isbn">ISBN:</label>
+        <input type="text" id="isbn" name="isbn" required>
+        <button type="submit">Check Out</button>
+    </form>
+
+    <h2>Return Book</h2>
+    <form method="POST" action="{{ url_for('return_book') }}">
+        <label for="patron_id">Patron ID:</label>
+        <input type="text" id="patron_id" name="patron_id" required>
+        <label for="isbn">ISBN:</label>
+        <input type="text" id="isbn" name="isbn" required>
+        <button type="submit">Return</button>
+    </form>
+</body>
+</html>
