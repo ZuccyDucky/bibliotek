@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
+from isbnlib import canonical, meta
 
 app = Flask(__name__)
 
@@ -8,10 +9,12 @@ patrons = []
 next_patron_id = 1  # Initialize the unique identifier for patrons
 
 class Book:
-    def __init__(self, title, author, isbn, checked_out=False):
+    def __init__(self, title, author, isbn, year, publisher, checked_out=False):
         self.title = title
         self.author = author
         self.isbn = isbn
+        self.year = year
+        self.publisher = publisher
         self.checked_out = checked_out
 
 class Patron:
@@ -27,11 +30,15 @@ def index():
 
 @app.route('/add_book', methods=['POST'])
 def add_book():
-    title = request.form['title']
-    author = request.form['author']
-    isbn = request.form['isbn']
 
-    new_book = Book(title=title, author=author, isbn=isbn)
+    isbn = canonical(request.form['isbn'])
+    data = meta(isbn, service='default')
+    author = data['Authors']
+    title = data['Title']
+    year = data['Year']
+    publisher = data['Publisher']
+
+    new_book = Book(title=title, author=author, isbn=isbn, year=year, publisher=publisher)
     books.append(new_book)
 
     return redirect(url_for('index'))
