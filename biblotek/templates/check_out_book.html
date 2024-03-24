@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Book</title>
+    <title>Store Patron in Database</title>
 </head>
 <body>
-    <h1>Add Book</h1>
-    <form method="POST" action="{{ url_for('add_book') }}">
+    <h2>Check Out Book</h2>
+    <form method="POST" action="{{ url_for('check_out') }}">
+        <label for="patron_id">Patron ID:</label>
+        <input type="text" id="patron_id" name="patron_id" required>
         <label for="isbn">ISBN:</label>
         <input type="text" id="isbn" name="isbn" required>
-        <button type="submit">Add Book</button>
+        <button type="submit">Check Out</button>
     </form>
     {% with messages = get_flashed_messages() %}
         {% if messages %}
