@@ -8,7 +8,8 @@
 </head>
 <body>
     <h1>Add Book</h1>
-    <form method="POST">
-        {{ form.csrf_token }}
-        {{ form.hidden_tag() }}
-       
+    <form method="POST" action="{{ url_for('add_book') }}">
+        <label for="isbn">ISBN:</label>
+        <input type="text" id="isbn" name="isbn" required>
+        <button type="submit">Add Book</button>
+    </form>
