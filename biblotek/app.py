@@ -47,18 +47,40 @@ class Patron:
 def index():
     return render_template('index.html', books=books, patrons=patrons)
 
-@app.route('/add_book', methods=['POST'])
+@app.route('/add_book', methods=['GET', 'POST'])
 def add_book():
+    try:
+        conn  = mysql.connector.connect(
+            host=app.config['MYSQL_HOST'],
+            user=app.config['MYSQL_USER'],
+            password=app.config['MYSQL_PASSWORD'],
+            database=app.config['MYSQL_DB'],
+            charset = app.config['CHARSET']
+            )
+        cursor = conn.cursor()
+        form = NameForm()
+        if form.validate_on_submit():
+            isbn = canonical(request.form['isbn'])
+            data = meta(isbn, service='default')
+            author = data['Authors']
+            title = data['Title']
+            year = data['Year']
+            publisher = data['Publisher']
 
-    isbn = canonical(request.form['isbn'])
-    data = meta(isbn, service='default')
-    author = data['Authors']
-    title = data['Title']
-    year = data['Year']
-    publisher = data['Publisher']
+            new_book = Book(title=title, author=author, isbn=isbn, year=year, publisher=publisher)
+            books.append(new_book)
 
-    new_book = Book(title=title, author=author, isbn=isbn, year=year, publisher=publisher)
-    books.append(new_book)
+            flash('Name successfully added to the database!', 'success')
+        return render_template('add_book.html', form=form)
+
+    except mysql.connector.Error as err:    
+        return f"Error: {err}"
+
+    finally:
+        # Close connection
+        cursor.close()
+        conn.close()
+
 
     return redirect(url_for('index'))
 
@@ -121,29 +143,70 @@ def readpatrons():
         cursor.close()
         conn.close()
 
-@app.route('/check_out', methods=['POST'])
+@app.route('/check_out', methods=['GET', 'POST'])
 def check_out():
-    patron_id = int(request.form['patron_id'])
-    isbn = request.form['isbn']
+    try:
+        conn  = mysql.connector.connect(
+            host=app.config['MYSQL_HOST'],
+            user=app.config['MYSQL_USER'],
+            password=app.config['MYSQL_PASSWORD'],
+            database=app.config['MYSQL_DB'],
+            charset = app.config['CHARSET']
+            )
+        cursor = conn.cursor()
+        form = NameForm()
+        if form.validate_on_submit():
+            patron_id = int(request.form['patron_id'])
+            isbn = request.form['isbn']
+        
+            for book in books:
+                if book.isbn == isbn and not book.checked_out:
+                    book.checked_out = True
+                return "Book not available for checkout or invalid ISBN."
+            flash('Name successfully added to the database!', 'success')
+        return render_template('check_out_book.html', form=form)
+    
+    except mysql.connector.Error as err:    
+        return f"Error: {err}"
 
-    for book in books:
-        if book.isbn == isbn and not book.checked_out:
-            book.checked_out = True
-            return redirect(url_for('index'))
-
-    return "Book not available for checkout or invalid ISBN."
+    finally:
+        # Close connection
+        cursor.close()
+        conn.close()
+        
 
 @app.route('/return_book', methods=['POST'])
 def return_book():
-    patron_id = int(request.form['patron_id'])
-    isbn = request.form['isbn']
+    try:
+        conn  = mysql.connector.connect(
+            host=app.config['MYSQL_HOST'],
+            user=app.config['MYSQL_USER'],
+            password=app.config['MYSQL_PASSWORD'],
+            database=app.config['MYSQL_DB'],
+            charset = app.config['CHARSET']
+            )
+        cursor = conn.cursor()
+        form = NameForm()
+        if form.validate_on_submit():
 
-    for book in books:
-        if book.isbn == isbn and book.checked_out:
-            book.checked_out = False
-            return redirect(url_for('index'))
+            patron_id = int(request.form['patron_id'])
+            isbn = request.form['isbn']
+        
+            for book in books:
+                if book.isbn == isbn and book.checked_out:
+                    book.checked_out = False   
+                return "Book not checked out or invalid ISBN."
+            flash('Name successfully added to the database!', 'success')
+        return render_template('return_book.html', form=form)
 
-    return "Book not checked out or invalid ISBN."
+    except mysql.connector.Error as err:    
+        return f"Error: {err}"
+
+    finally:
+        # Close connection
+        cursor.close()
+        conn.close()
+
 
 if __name__ == '__main__':
     app.run(debug=True)
